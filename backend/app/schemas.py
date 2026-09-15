@@ -10,6 +10,7 @@ class DocumentChunk(BaseModel):
     fiscal_year: int | None = None
     section: str | None = None
     source_name: str
+    document_id: str | None = None
 
 
 class IngestResponse(BaseModel):
@@ -18,6 +19,16 @@ class IngestResponse(BaseModel):
     pages: int
     chunks: int
     indexed: bool
+
+
+class DocumentInfo(BaseModel):
+    document_id: str
+    source_name: str
+    company: str
+    document_type: str
+    fiscal_year: int | None = None
+    pages: int
+    chunks: int
 
 
 class SearchRequest(BaseModel):
@@ -35,6 +46,7 @@ class SearchResult(BaseModel):
     company: str
     fiscal_year: int | None = None
     section: str | None = None
+    document_id: str | None = None
 
 
 class AskRequest(SearchRequest):
