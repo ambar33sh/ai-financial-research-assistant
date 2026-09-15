@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.services.analytics import calculate_metrics
+from app.services.comparison import compare_companies
 from app.services.risk_detector import detect_financial_risks
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
@@ -37,8 +38,14 @@ class RiskRequest(BaseModel):
     current_ratio: float | None = None
 
 
+class ComparisonRequest(BaseModel):
+    company_a: dict
+    company_b: dict
+
+
 @router.post("/metrics")
 def metrics(request: MetricsRequest) -> dict:
+    """Calculate financial metrics deterministically; the LLM is not involved."""
     try:
         return calculate_metrics(**request.model_dump()).__dict__
     except ValueError as exc:
@@ -48,3 +55,8 @@ def metrics(request: MetricsRequest) -> dict:
 @router.post("/risks")
 def risks(request: RiskRequest) -> list[dict]:
     return [flag.__dict__ for flag in detect_financial_risks(**request.model_dump())]
+
+
+@router.post("/compare")
+def compare(request: ComparisonRequest) -> dict:
+    return compare_companies(request.company_a, request.company_b)
