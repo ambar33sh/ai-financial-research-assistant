@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.analytics_api import router as analytics_router
 from app.api import router
 from app.config import get_settings
 
@@ -16,3 +17,4 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix=settings.api_prefix)
+app.include_router(analytics_router, prefix=settings.api_prefix)
