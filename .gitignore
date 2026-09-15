@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+.next/
+out/
+.npm/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Runtime data
+uploads/
+qdrant_storage/
+*.db
+*.sqlite3
+
+# Evaluation output
+evaluation/results/*.json
+
+# Secrets
+*.pem
+*.key
