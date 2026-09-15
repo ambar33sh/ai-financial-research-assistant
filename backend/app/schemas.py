@@ -54,3 +54,22 @@ class AskResponse(BaseModel):
     citations: list[Citation]
     evidence_strength: str
     calculation: dict | None = None
+
+
+class MetricsRequest(BaseModel):
+    revenue: float | None = None
+    previous_revenue: float | None = None
+    beginning_revenue: float | None = None
+    years: float | None = Field(default=None, gt=0)
+    gross_profit: float | None = None
+    operating_income: float | None = None
+    net_income: float | None = None
+    free_cash_flow: float | None = None
+    debt: float | None = None
+    equity: float | None = None
+    current_assets: float | None = None
+    current_liabilities: float | None = None
+    quick_assets: float | None = None
+    average_equity: float | None = None
+    average_assets: float | None = None
+    invested_capital: float | None = None
