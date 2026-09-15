@@ -8,39 +8,45 @@ FinSight AI is an internship-scale financial research assistant that turns compa
 
 - Upload PDF financial reports
 - Extract and structure document text with page metadata
-- Structure-aware chunking
+- Structure-aware chunking with section detection
 - Semantic vector retrieval with Qdrant
-- Hybrid retrieval with keyword scoring
+- Hybrid retrieval using vector similarity + candidate-set BM25
 - Cross-encoder reranking
 - RAG answers with page-level citations
-- Query routing between research, analytics, and hybrid workflows
+- Lightweight query-intent routing for research, analytics, and hybrid queries
 - Deterministic financial ratio and growth calculations
-- Company comparison
-- Explainable red-flag detection
-- Evaluation and automated tests
+- Deterministic company comparison endpoint
+- Explainable financial red-flag detection
+- Persistent document metadata registry
+- Evaluation scaffolding and automated tests
+
+> **Routing note:** Query routing currently classifies intent and is exposed in the API response. It does not yet automatically extract financial values from natural-language questions and execute a calculation. Structured calculations are available through the deterministic analytics endpoints.
 
 ## Architecture
 
 ```text
 PDF -> Parser -> Chunker -> Embeddings -> Qdrant
-                                         |
-Question -> Router -> Retriever -> Reranker
-                       |                 |
-                       +--> Analytics ---+
-                              |
-                           LLM Answer
-                              |
-                         Citations/Evidence
+                         |                    |
+                         +-> Document Registry |
+                                              |
+Question -> Intent Router -> Hybrid Retriever -> Cross-Encoder
+                                      |                 |
+                                      +-------------> Grounded LLM
+                                                        |
+                                              Citations / Evidence
+
+Structured financial inputs -> Deterministic Analytics -> Metrics / Risks / Comparison
 ```
 
 ## Tech stack
 
 - Backend: Python, FastAPI, Pydantic
-- Retrieval: Qdrant, Sentence Transformers
+- Retrieval: Qdrant, Sentence Transformers, BM25, cross-encoder reranking
 - LLM: OpenAI-compatible API
-- Frontend: Next.js, TypeScript, Tailwind CSS
+- Frontend: Next.js, TypeScript
 - Tests: pytest
 - Local infrastructure: Docker Compose
+- Metadata persistence: SQLite registry
 
 ## Quick start
 
@@ -50,7 +56,6 @@ Question -> Router -> Retriever -> Reranker
 cd backend
 python -m venv .venv
 # Windows: .venv\\Scripts\\activate
-# macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 copy .env.example .env  # Windows
 # cp .env.example .env  # macOS/Linux
@@ -72,6 +77,18 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+## API highlights
+
+- `GET /api/v1/health` — health check
+- `POST /api/v1/documents` — ingest and index a PDF
+- `GET /api/v1/documents` — list registered documents
+- `GET /api/v1/documents/{document_id}` — retrieve document metadata
+- `POST /api/v1/search` — hybrid document retrieval
+- `POST /api/v1/ask` — grounded research answer with citations
+- `POST /api/v1/analytics/metrics` — deterministic financial metrics
+- `POST /api/v1/analytics/risks` — deterministic financial risk flags
+- `POST /api/v1/analytics/compare` — deterministic company comparison
 
 ## Environment variables
 
