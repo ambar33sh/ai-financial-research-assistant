@@ -4,7 +4,8 @@ from uuid import uuid4
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.config import get_settings
-from app.schemas import AskRequest, AskResponse, IngestResponse, SearchRequest, SearchResult
+from app.schemas import AskRequest, AskResponse, IngestResponse, MetricsRequest, SearchRequest, SearchResult
+from app.services.analytics import calculate_metrics
 from app.services.chunker import FinancialChunker
 from app.services.hybrid_retriever import HybridRetriever
 from app.services.llm import LLMService
@@ -63,3 +64,9 @@ def ask(request: AskRequest) -> AskResponse:
     results = hybrid_retriever.retrieve(request.query, request.top_k, request.company, request.fiscal_year)
     answer, citations, strength = llm.answer(request.query, results)
     return AskResponse(answer=answer, route=route, citations=citations, evidence_strength=strength)
+
+
+@router.post("/analytics/metrics")
+def metrics(request: MetricsRequest) -> dict:
+    """Calculate financial metrics deterministically; the LLM is not involved."""
+    return calculate_metrics(**request.model_dump()).__dict__
