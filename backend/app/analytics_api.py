@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.services.analytics import calculate_metrics
 from app.services.comparison import compare_companies
+from app.services.language_risk_detector import detect_language_risks
 from app.services.risk_detector import detect_financial_risks
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
@@ -43,6 +44,10 @@ class ComparisonRequest(BaseModel):
     company_b: dict
 
 
+class LanguageRiskRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=100_000)
+
+
 @router.post("/metrics")
 def metrics(request: MetricsRequest) -> dict:
     """Calculate financial metrics deterministically; the LLM is not involved."""
@@ -55,6 +60,11 @@ def metrics(request: MetricsRequest) -> dict:
 @router.post("/risks")
 def risks(request: RiskRequest) -> list[dict]:
     return [flag.__dict__ for flag in detect_financial_risks(**request.model_dump())]
+
+
+@router.post("/language-risks")
+def language_risks(request: LanguageRiskRequest) -> list[dict]:
+    return [flag.__dict__ for flag in detect_language_risks(request.text)]
 
 
 @router.post("/compare")
