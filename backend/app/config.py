@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     api_prefix: str = "/api/v1"
     max_upload_mb: int = 25
+    frontend_origin: str = "http://localhost:3000"
 
     qdrant_url: str = "http://localhost:6333"
     qdrant_api_key: str | None = None
