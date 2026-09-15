@@ -27,9 +27,14 @@ class FinancialChunker:
 
     def _section(self, text: str, current: str | None) -> str | None:
         for line in text.splitlines():
-            cleaned = re.sub(r"[^a-zA-Z'’ ]", "", line).strip().lower()
-            if cleaned and (cleaned in HEADING_HINTS or len(cleaned.split()) <= 7 and cleaned.isupper()):
-                return line.strip()
+            raw = line.strip()
+            normalized = re.sub(r"[^a-zA-Z'’ ]", "", raw).strip().lower()
+            if not normalized:
+                continue
+            is_heading = normalized in HEADING_HINTS
+            is_all_caps = raw == raw.upper() and any(char.isalpha() for char in raw) and len(normalized.split()) <= 7
+            if is_heading or is_all_caps:
+                return raw
         return current
 
     def chunk_pages(
@@ -39,6 +44,7 @@ class FinancialChunker:
         company: str,
         document_type: str,
         fiscal_year: int | None = None,
+        document_id: str | None = None,
     ) -> list[DocumentChunk]:
         chunks: list[DocumentChunk] = []
         section: str | None = None
@@ -64,6 +70,7 @@ class FinancialChunker:
                         fiscal_year=fiscal_year,
                         section=section,
                         source_name=source_name,
+                        document_id=document_id,
                     ))
                     index += 1
                 if end >= len(text):
