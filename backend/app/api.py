@@ -6,6 +6,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from app.config import get_settings
 from app.schemas import AskRequest, AskResponse, IngestResponse, SearchRequest, SearchResult
 from app.services.chunker import FinancialChunker
+from app.services.hybrid_retriever import HybridRetriever
 from app.services.llm import LLMService
 from app.services.pdf_parser import PDFParser
 from app.services.query_router import QueryRouter
@@ -15,6 +16,7 @@ router = APIRouter()
 parser = PDFParser()
 chunker = FinancialChunker()
 store = VectorStore()
+hybrid_retriever = HybridRetriever()
 llm = LLMService()
 router_service = QueryRouter()
 
@@ -52,12 +54,12 @@ async def ingest_document(
 
 @router.post("/search", response_model=list[SearchResult])
 def search(request: SearchRequest) -> list[SearchResult]:
-    return store.search(request.query, request.top_k, request.company, request.fiscal_year)
+    return hybrid_retriever.retrieve(request.query, request.top_k, request.company, request.fiscal_year)
 
 
 @router.post("/ask", response_model=AskResponse)
 def ask(request: AskRequest) -> AskResponse:
     route = router_service.route(request.query)
-    results = store.search(request.query, request.top_k, request.company, request.fiscal_year)
+    results = hybrid_retriever.retrieve(request.query, request.top_k, request.company, request.fiscal_year)
     answer, citations, strength = llm.answer(request.query, results)
     return AskResponse(answer=answer, route=route, citations=citations, evidence_strength=strength)
