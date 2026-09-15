@@ -4,8 +4,9 @@ from uuid import uuid4
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.config import get_settings
-from app.schemas import AskRequest, AskResponse, IngestResponse, SearchRequest, SearchResult
+from app.schemas import AskRequest, AskResponse, DocumentInfo, IngestResponse, SearchRequest, SearchResult
 from app.services.chunker import FinancialChunker
+from app.services.document_registry import DocumentRegistry
 from app.services.hybrid_retriever import HybridRetriever
 from app.services.llm import LLMService
 from app.services.pdf_parser import PDFParser
@@ -19,11 +20,25 @@ store = VectorStore()
 hybrid_retriever = HybridRetriever()
 llm = LLMService()
 router_service = QueryRouter()
+registry = DocumentRegistry()
 
 
 @router.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "service": "finsight-backend"}
+
+
+@router.get("/documents", response_model=list[DocumentInfo])
+def list_documents() -> list[DocumentInfo]:
+    return registry.list()
+
+
+@router.get("/documents/{document_id}", response_model=DocumentInfo)
+def get_document(document_id: str) -> DocumentInfo:
+    document = registry.get(document_id)
+    if document is None:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return document
 
 
 @router.post("/documents", response_model=IngestResponse)
@@ -61,6 +76,15 @@ async def ingest_document(
         indexed = store.upsert(chunks) == len(chunks)
         if not indexed:
             raise HTTPException(status_code=503, detail="Document indexing was incomplete")
+        registry.add(DocumentInfo(
+            document_id=document_id,
+            source_name=safe_name,
+            company=company,
+            document_type=document_type,
+            fiscal_year=fiscal_year,
+            pages=len(pages),
+            chunks=len(chunks),
+        ))
         return IngestResponse(
             document_id=document_id,
             source_name=safe_name,
