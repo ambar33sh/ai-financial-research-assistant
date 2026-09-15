@@ -17,6 +17,7 @@ FinSight AI is an internship-scale financial research assistant that turns compa
 - Deterministic financial ratio and growth calculations
 - Deterministic company comparison endpoint
 - Explainable financial red-flag detection
+- Deterministic management-language risk detection for selected filing phrases
 - Persistent document metadata registry
 - Evaluation scaffolding and automated tests
 
@@ -88,6 +89,7 @@ Open `http://localhost:3000`.
 - `POST /api/v1/ask` — grounded research answer with citations
 - `POST /api/v1/analytics/metrics` — deterministic financial metrics
 - `POST /api/v1/analytics/risks` — deterministic financial risk flags
+- `POST /api/v1/analytics/language-risks` — selected management-language risk flags
 - `POST /api/v1/analytics/compare` — deterministic company comparison
 
 ## Environment variables
