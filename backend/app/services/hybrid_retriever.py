@@ -1,12 +1,20 @@
+import re
 from functools import lru_cache
 
 from rank_bm25 import BM25Okapi
 from sentence_transformers import CrossEncoder
 
 from app.config import get_settings
-from app.schemas import DocumentChunk, SearchResult
+from app.schemas import SearchResult
 from app.services.embeddings import EmbeddingService
 from app.services.vector_store import VectorStore
+
+
+TOKEN_RE = re.compile(r"[a-zA-Z0-9]+")
+
+
+def tokenize(text: str) -> list[str]:
+    return TOKEN_RE.findall(text.lower())
 
 
 @lru_cache
@@ -15,12 +23,7 @@ def get_reranker() -> CrossEncoder:
 
 
 class HybridRetriever:
-    """Combine vector candidates with lexical matching and a cross-encoder reranker.
-
-    Qdrant remains the primary candidate source. The lexical stage operates on the
-    retrieved candidate set so the service remains simple and scalable for the
-    internship-sized corpus.
-    """
+    """Retrieve with vector similarity, candidate-set BM25, then cross-encoder reranking."""
 
     def __init__(self) -> None:
         self.store = VectorStore()
@@ -31,17 +34,20 @@ class HybridRetriever:
         if not candidates:
             return []
 
-        query_terms = set(query.lower().split())
-        lexical_scores = []
-        for item in candidates:
-            terms = item.text.lower().split()
-            overlap = len(query_terms.intersection(terms)) / max(len(query_terms), 1)
-            lexical_scores.append(overlap)
+        corpus = [tokenize(item.text) for item in candidates]
+        bm25 = BM25Okapi(corpus)
+        raw_scores = bm25.get_scores(tokenize(query))
+        minimum = float(min(raw_scores))
+        maximum = float(max(raw_scores))
+        if maximum > minimum:
+            lexical_scores = [(float(score) - minimum) / (maximum - minimum) for score in raw_scores]
+        else:
+            lexical_scores = [0.0] * len(raw_scores)
 
         for item, lexical in zip(candidates, lexical_scores):
-            item.score = 0.7 * item.score + 0.3 * lexical
+            item.score = 0.7 * float(item.score) + 0.3 * lexical
 
-        candidates.sort(key=lambda x: x.score, reverse=True)
+        candidates.sort(key=lambda item: item.score, reverse=True)
         shortlist = candidates[: max(top_k * 2, 8)]
         try:
             rerank_scores = get_reranker().predict([(query, item.text) for item in shortlist])
