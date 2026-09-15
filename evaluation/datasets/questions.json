@@ -1,0 +1,10 @@
+[
+  {
+    "id": "qa-001",
+    "category": "factual",
+    "question": "Replace this with a question grounded in a source report.",
+    "expected_answer": "",
+    "expected_source": "",
+    "expected_page": null
+  }
+]
