@@ -1,0 +1,34 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: #f7f8fa; color: #17202a; font-family: Arial, Helvetica, sans-serif; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.shell { min-height: 100vh; }
+.topbar { height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; background: #fff; border-bottom: 1px solid #e6e8eb; }
+.brand { font-size: 21px; font-weight: 800; letter-spacing: -0.5px; }
+.brand span { font-weight: 400; color: #68717b; }
+.badge { font-size: 12px; padding: 7px 10px; border: 1px solid #dfe3e8; border-radius: 999px; color: #59636e; background: #fafbfc; }
+.main { max-width: 1180px; margin: 0 auto; padding: 48px 28px 80px; }
+.hero { margin-bottom: 30px; }
+.eyebrow { text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; font-weight: 700; color: #68717b; }
+h1 { margin: 8px 0 10px; font-size: 42px; letter-spacing: -1.5px; }
+.hero p { max-width: 720px; color: #5f6872; line-height: 1.65; }
+.grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; }
+.card { background: #fff; border: 1px solid #e1e5e9; border-radius: 16px; padding: 22px; box-shadow: 0 8px 30px rgba(20, 30, 40, 0.04); }
+.card h2 { margin: 0 0 7px; font-size: 18px; }
+.muted { color: #68717b; font-size: 13px; line-height: 1.55; }
+.upload { margin-top: 18px; padding: 30px; border: 1.5px dashed #cbd1d8; border-radius: 12px; text-align: center; }
+.file { display: block; margin: 16px auto; max-width: 100%; }
+.row { display: flex; gap: 10px; margin-top: 12px; }
+.input { width: 100%; border: 1px solid #d7dce1; border-radius: 9px; padding: 11px 12px; outline: none; }
+.input:focus { border-color: #8a949e; }
+.primary { border: 0; border-radius: 9px; padding: 11px 16px; background: #17202a; color: #fff; font-weight: 700; }
+.primary:disabled { opacity: .5; cursor: not-allowed; }
+.question { margin-top: 14px; }
+.answer { margin-top: 18px; padding-top: 18px; border-top: 1px solid #eceff2; white-space: pre-wrap; line-height: 1.65; }
+.sources { margin-top: 16px; display: grid; gap: 8px; }
+.source { border: 1px solid #e4e7ea; border-radius: 9px; padding: 11px; font-size: 12px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+.stat { padding: 15px; background: #fafbfc; border: 1px solid #edf0f2; border-radius: 10px; }
+.stat strong { display: block; font-size: 20px; margin-top: 5px; }
+@media (max-width: 850px) { .topbar { padding: 0 20px; } .grid { grid-template-columns: 1fr; } h1 { font-size: 34px; } }
